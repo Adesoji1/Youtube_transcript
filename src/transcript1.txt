@@ -1,0 +1,1283 @@
+hi everybody my name is Jim Clark uh I
+am a member of Docker Labs we are
+working on Innovation at at Docker um
+You probably saw some of our some of our
+talks today we&#39;ve been working on AIML
+dock debug I&#39;ve been doing some research
+over the past six months I guess on ncks
+and I have to say besides llms which
+have been like an exciting and big part
+of our uh of our of our work for the
+last for the last while NY has actually
+had a really big influence on the way
+I&#39;ve been working maybe one of the
+bigger influences uh over the over the
+last year so I&#39;m kind of excited to look
+out and get an opportunity to see people
+who are either using nxs today or
+hopefully we&#39;ll be using uh nxs tomorrow
+so I&#39;m excited I&#39;m I&#39;m a Nick&#39;s
+Enthusiast but relatively new just just
+been using it in the last year so I&#39;m
+I&#39;m excited to have Tom uh he is maybe
+not a NYX Enthusiast what would you call
+yourself uh I think I&#39;m more in the
+category of nxs fanatic at this point
+there&#39;s no going back um but yeah my
+name is Tom bney um director of Labs at
+flocks where we&#39;re trying to kind of
+figure out what this set of superpowers
+are and how do we bring them to the
+world how do we figure out how to expose
+them present them in a usable way and uh
+that&#39;s really our uh Mission so I think
+uh let&#39;s get
+started okay
+agenda um I think it&#39;s going to be
+easiest to talk about where we are today
+because we&#39;re going to talk about
+content today and so we build content
+for Docker using Docker images Docker
+files these are great I obviously um
+I&#39;ll I&#39;ll speak from the docker file and
+Docker perspective in this talk um they
+do we we&#39;re going to admit some
+limitations to them and I I I hopefully
+will you&#39;ll you&#39;ll see in our examples
+how you over overcome some of these
+limitations today I want to kind of
+impress upon you the idea that NYX is
+another option that we have here this
+adopting a declarative approach and how
+we can use Docker and Nyx together is
+the thing that we really want to
+everybody to get out of this out of this
+talk today and at the end we&#39;ve got a
+little bit of a call to action because
+there are some actually really
+interesting opportunities that we have
+to bring a new way of using both Docker
+and Nyx together and we&#39;re kind of like
+interested in what whether whether
+people want to join us on that
+yep so the the point here is to kind of
+get some interest and also then take
+that interest or momentum and go to the
+next
+steps okay so let&#39;s start with Docker
+files that&#39;s where we are today and uh
+that the the picture that you&#39;ll all be
+familiar with here
+is our mental model of how we build
+content in images so we have Docker
+files Docker files produce layers that
+relationship between an instruction and
+a layer is is one to one we all think
+about this as a stack you start you
+start with your operating system you
+start to you do things at the end of
+doing something you take a snapshot and
+you keep you keep building these layers
+one by one until you&#39;ve you&#39;ve got your
+entire image so I kind of want to set
+this ground this ground work because
+this is where we&#39;re start this is where
+we are right now and we&#39;re going to
+start to kind of like look at how we
+might change that to get a few
+improvements to our to our workflow yeah
+it&#39;s important to note that this model
+it works it&#39;s simple it gives you a good
+mental model that mental model is is
+actually somewhat accurate and that
+means that it doesn&#39;t leak or cause
+problems very often but there are some
+limitations so let&#39;s talk about some of
+those right so um I I&#39;m not going to
+talk about like why we like Docker files
+we all like Docker files it&#39;s a great
+way of getting getting our content into
+into into our images um
+what what I&#39;ll talk a little bit about
+is how do we share them and when you&#39;re
+when you&#39;re thinking about the a Docker
+file that you&#39;ve made and is working
+great how do you how do you treat that
+like a like something like a library
+that you get to share with other people
+how do you manage or or maybe I&#39;ll ask
+it this way have you ever had the
+experience where you kind of know that
+you&#39;ve maybe put a little bit too much
+into into one of your Docker images
+um best practices the you the first
+Docker file you write doesn&#39;t look a lot
+like the last Docker file you write
+there is a journey there and those best
+practices when we when we learn them I
+mean our images get better we have an
+understanding of where you start where
+you end how do we encapsulate those best
+practices and finally um supply chain
+considerations yeah this a topic that&#39;s
+coming up more and more often there&#39;s
+more interest in Supply fly chain and Es
+bombs and how do we do and how do we
+handle these things in a disciplined
+manner how do we address all of these
+things and that&#39;s pretty much the rest
+of the talk is going to be
+about I don&#39;t know if bloat is the right
+word bloat is yeah bloat is a good is a
+is a good word here um so everyone has
+the experience
+of where how the content that you put in
+your Docker image is maybe not the
+content that you actually need to run
+and sometimes that&#39;s because you need a
+lot of tools to build and you don&#39;t need
+those tools when you run but it&#39;s also
+another thing there&#39;s a phenomenon of
+the easiest thing to do is just to get
+everything I mean it&#39;s a little bit like
+when you&#39;re packing for a holiday the
+easiest thing to do is just throw
+everything in your suitcase but there is
+actually a price to pay for that and um
+on a plane it might be that it just
+doesn&#39;t fit but in the in the world of
+like content there&#39;s also the problem of
+there&#39;s a bit of a tax if you&#39;ve got
+content in that that you don&#39;t need and
+let&#39;s just say that some of that content
+becomes vulnerable you might have work
+to do and so there isn&#39;t it it the the
+ability to kind of like obsess a little
+bit over only having the smallest amount
+of content that you need sometimes that
+Obsession provides is that&#39;s work for us
+and what we&#39;re going to talk about today
+is a way that you can kind of build up
+to only having the content you need
+easily so the key the key word here is
+easily and that might make you think
+about multi-stage builds is that not the
+problem it solves and in some sense uh
+it might I yeah it is right I mean
+multi-stage builds are a great way of of
+handling this you you&#39;ve you&#39;ve got one
+stage to build up your build graph this
+is everything that you need in order to
+build your content and then what do you
+do you copy out the minimal amount that
+you need into into your runtime and that
+sentence copy out the minimal amount
+that you need how do you do that like
+what does that even mean to go to to
+take the content that you need from your
+build and move it you have to understand
+how to do that that is that that itself
+is a kind of a piece of knowledge that
+you need yeah this this requires
+expertise you need to know what you need
+to pull out of it uh sometimes if you
+have a larger and more complex project
+you&#39;re going to have Dynamic libraries
+you&#39;re going to have things loaded only
+at runtime you&#39;re going to have
+scripting languages for which this is a
+very non-trivial problem right right if
+you can static build everything right
+It&#39;s relatively simple but as soon as
+you start having a more complex piece of
+software uh now you don&#39;t know did I
+grab too much did I grab too little uh
+are the errors I&#39;m going to run into
+only going to show up in production
+because those code pads only show up
+there and I don&#39;t have a way to verify
+did I get everything I needed and
+sometimes fixing this is easy sometimes
+it&#39;s hard but it always if you tend to
+try to like hope for the best it always
+tends to bite you and it tends to bite
+you at the worst possible moment so how
+do we make it so that we actually know
+UPF front whether or not we have
+everything that we
+need so for for modularity the way I
+like to think about it is as developers
+how do we approach
+modularity when you have something that
+you want to reuse you put it in a
+library you package it up you give
+people the git coordinate for it and you
+share
+it and in some ways when we&#39;ve figured
+out how to do uh to to package our our
+image why don&#39;t we use aim SAR sort of
+technique and so one of one of the
+things that we&#39;re going to try to
+impress upon you today is that we
+actually can do something very similar
+in this sphere yeah and this is just
+kind of an example of showing that I
+want to bring in wisdom from two
+different sources maybe it&#39;s a best
+practice maybe it&#39;s a company policy
+maybe it&#39;s how my particular language
+ecosystem is supposed to work but I want
+to bring those in and use all those
+pieces of wisdom at once but notice how
+this kind of looks like there&#39;s kind of
+two things that I need to inherit from
+right right not one it starts to look
+not like that stack or that list that we
+looked at before but it starts to look
+more like using libraries it starts to
+look like the sort of read use and
+modularity that developers are often
+familiar with so but how do we do this
+how do we do this in in a structured
+manner how do we do this again in a way
+that uh imposes like the correct
+controls that we
+want so this is this is a slide I like
+um maybe it&#39;s a little bit too abstract
+but I like to think about what is Docker
+build um what is the the docker file
+it&#39;s a way for us it&#39;s it&#39;s it&#39;s a
+function that we can run where the
+output
+is the output are layers of content and
+what are the inputs to that function so
+if you squint at a at a Docker file you
+realize okay it this this defines my
+function the inputs are things like from
+lines what content
+where where am I starting with um
+statements like copies when I want to
+copy something from a multi-stage build
+or in the or just a run line where I
+might you know grab some content from
+the internet where I guess the uh input
+to my function is uh the internet so
+learning how the how we can control
+those inputs so that we can consistent
+so that we have consistent verifiable
+outputs that&#39;s one of the that&#39;s one of
+the big things that we&#39;re going to be uh
+addressing in the next section yeah when
+you contact the internet right anything
+can happen and it also means that now
+like all your efforts to try to control
+what went into your software goes a
+little bit Haywire right what did you
+just put into your software it could be
+something that you need something that
+you don&#39;t need it might have been
+changed along the way right how do you
+verify this right so every time you go
+do this uncontrolled access either to a
+build context or to the internet or just
+do something that kind of breaks out and
+tries to pull these things in it&#39;s very
+pragmatic right it&#39;s very useful but now
+we&#39;ve kind of thrown a lot of the
+control and the repeatability right
+there&#39;s all these kind of words we keep
+using about how do I go back in time how
+do I debug how do I figure out whether
+or not okay it worked for you but not
+worked for me like we end up with this
+problem of works on my machine and not
+yours even in the context of containers
+as I try to build the one that you did
+so we have a we have a problem to solve
+here so for me this is one of the things
+that really made NYX kind of an an
+important part of my my tool chain
+because for a c i I&#39;ve I know enough
+about Docker files that I can be very
+confident that I&#39;m keeping my CI and my
+production environments in
+sync but there was a point where I
+started to realize that my development
+environments I wasn&#39;t really even trying
+to keep them in sync with my my CI and
+production environments that that moment
+when I ask everyone on the team hey
+we&#39;re we&#39;re we&#39;re deploying this version
+we&#39;re using this version of npm what
+what what are people on in their local
+environments and you know people list a
+whole bunch of it&#39;s just entropy like
+there&#39;s nothing if there&#39;s nothing if
+there&#39;s no common definition that&#39;s
+keeping those in sync then they have a
+tendency to to get out of sync and this
+is this was really interesting that I
+was able to like start looking at a
+development environment and end up using
+that same definition to drive my uh
+environment I mean what we want here is
+we want all these things to like operate
+in the same way in the same predictable
+Manner and how do we do so well how
+about we try to set a standard like Hey
+try to run the same bits everywhere
+that&#39;s a good way at least to get
+started maybe you know some
+configuration might be different but
+let&#39;s just run the same stuff and have a
+commonality of behavior a commonality of
+outcomes so that you don&#39;t have a well
+this is a bug in prod but not in Ci or
+it&#39;s a bug locally but not anywhere else
+right these discrepancies are what slows
+us down as developers it slows down that
+inner
+loop so that&#39;s kind of like a a
+description of the problem um now let&#39;s
+get a in a little bit into what what
+some of the solutions might look
+like so uh about a decade ago came
+across this thing uh called NYX and one
+of its uh kind of early phrases that&#39;s
+in the original thesis is that uh NYX is
+about getting computer programs from one
+machine to another and having them still
+work when they get there I think that&#39;s
+a that&#39;s a statement we can all agree we
+want I mean that&#39;s essentially the
+mission statement I&#39;d say of most people
+writing software you don&#39;t just write
+software for yourself you write software
+so that other people can run it or that
+it can be useful for other people as
+well we don&#39;t just kind of look
+internally we want to be able to push
+things out and have reuse we want to be
+able to distribute our services and
+scale them right this is what this is
+something that we want to do and uh this
+is something that like NX does right and
+this is uh something that we&#39;ve been
+doing since about 2003 right we got a
+whole bunch of packages is we focus a
+lot on correctness and Providence and
+reproducibility we incorporate a lot of
+these best practices that we talk about
+we incorporate them very early in a very
+like disciplined manner you know
+sometimes so disciplined that it might
+be a little painful it&#39;s kind of like
+eating your vegetables but we make sure
+you do it um that also comes with a a
+bit of a learning curve right this is
+something that flock is working on we&#39;re
+trying to make that adoption process
+easier so you know keep an eye out for
+that work uh Upstream I&#39;m also part of
+the Nyx maintainer group that&#39;s also
+part of trying to make this whole effort
+better to make it usable but we want to
+have declarative a framework right
+that&#39;s what we want to be able to
+leverage and the last piece of this is
+like yeah there&#39;s also like a perception
+problem about this ecosystem so part of
+this talk is to try to kind of talk
+about that perception problem and see
+what we could do to to fix this because
+there are some changes here and we want
+to also expose that like there is real
+use behind this you know for example
+yesterday&#39;s keynote was talking about
+the uh Docker debugger extension that&#39;s
+using ncks under the hood as well like
+you&#39;re starting to see a lot more people
+take advantage of this and we have a
+Blog series pointing this out so I just
+want to kind of highlight that these are
+the sorts of things we&#39;re working
+on yeah and ultimately like Docker is
+also a tool for moving software from one
+place to another and so what we&#39;re and
+and it&#39;s actually pretty frequent for
+people to think about Docker versus NYX
+like there there&#39;s a the you if that&#39;s
+the that&#39;s the thing that you&#39;re going
+to see if you search online like do I
+use Docker or do I use NYX and what
+we&#39;re talking about here is Docker and
+Nyx couple of the couple of the reasons
+is that well I mean they they are
+distinct in some ways Docker is a
+container runtime NYX is container
+agnostic NYX has a package repository
+docker&#39;s package agnostic and although
+there there there are ways where we have
+to admit I mean there&#39;s a lot of overlap
+here like they both deal with the
+problem of in install conflicts they&#39;re
+they both have their own ways
+of of looking at
+isolation but they are it turns out that
+that when you when you look at this you
+you I think or at least what we&#39;re what
+we&#39;re we&#39;re trying to experiment with
+here is that they&#39;re very complimentary
+approaches and so that&#39;s what that&#39;s
+what we&#39;re going to get into next yeah a
+lot of what we&#39;re trying to figure out
+is how do we leverage those strengths of
+both and how do we integrate them well
+so that it kind of meets the needs of
+users so um I I don&#39;t know if this helps
+you but this helped me on my journey to
+kind of understand that we&#39;ve got this
+thing called the file hierarchy standard
+FHS and really that&#39;s a way of
+discovering programs and it&#39;s kind of
+saying hey if you&#39;re looking for a lib
+where should you go look in user lib if
+you&#39;re looking for a bin look in bin if
+uh and the the thing about uh about
+Nicks or the thing about like about
+standards like that is what if you have
+say a program like
+node and you got two versions you&#39;re in
+one project you want to use one version
+in another prod project you want to use
+another one they conflict like who gets
+to be user local bin node on your
+machine and Docker has a solution for
+that you isolate runtimes every runtime
+gets to make his own choice NYX also has
+a solution for that throw away the file
+hierarchy standard I never really
+thought could throw away the file
+hierarchy standard every time I&#39;ve used
+Linux it&#39;s been there I thought I
+thought it came I I just thought it was
+the 11th commandment well there and
+there you you can use that but and there
+are conventions there that are very
+useful but if we&#39;re trying to solve this
+problem of having software work no
+matter where it goes you can&#39;t have
+conflicts right this idea of conflicts
+once you have no conflicts between
+different packages or different uh run
+times or different programs different
+libraries you start to expose some
+interesting possibilities yeah and also
+personal story here I thought that that
+was going to blow my workflow completely
+out of the water the idea that my path
+environment wouldn&#39;t have like user bins
+and user local bins I was like well
+that&#39;s just not going to work and it&#39;s
+one of the few things like it&#39;s one of
+the things I didn&#39;t notice like it as I
+moved to Nyx I never noticed that I
+didn&#39;t have anything in user bin anymore
+so I my prediction was that this was
+going to be a huge change and in fact it
+turned out to be an unnoticeable change
+that was a surprise to
+me
+y um so the other mental shift that
+you&#39;re going to have to make in order to
+in order to understand this is there is
+a transition here from layers to graphs
+so as we said earlier a couple slides
+ago when you do a Docker build you are
+running a set of instructions and
+producing a producing a set of layers
+when you&#39;re doing a NYX build you are
+fullon producing a
+graph the they are they there&#39;s just a
+very different underlying construct is
+this a problem
+well well it&#39;s also closer to what a
+developer normally does when you start
+to compose code right that modularity
+question from the beginning right you
+want to grab all these like buckets of
+wisdom Snippets of wisdom right the
+error issues that someone has fixed up
+streams some librar something that&#39;s
+reusable you grab it from Here There and
+Everywhere maybe it&#39;s something that my
+organization puts out as a policy maybe
+it&#39;s something that Upstream does maybe
+it&#39;s something some other library that I
+wrote some other department wrote right
+you want to pull all these pieces in and
+again this looks far more like the
+standard programming model of hey I pull
+in libraries that are useful to me that
+are necessary right we&#39;re just kind of
+taking that similar model rather than
+only saying hey this Library can only be
+stacked under this library and that one
+right I pull the ones in that I need
+that brings in the wisdom and
+functionality that I need encoded in
+those locations yeah I mean sometimes I
+think in terms of stacks like every so
+often I look at a a thing a set of
+layers and it like makes this model in
+my head I go oh yeah that&#39;s the stack
+that I&#39;m running on but when I think
+about the actual program I often think
+about the dependency graph that that
+supports that so I I sort of feel like I
+I in in practice think of think of this
+in two different ways and they both have
+their uses
+yeah all right and how do we manage this
+graph right this graph is obviously more
+complicated than a set of layers and so
+uh one thing that we are looking at is
+well hey we talked about that multi
+stage build right how do we take that
+graph the set of things that you have
+and then carve out of it only the things
+you need at runtime because very often
+the context you need a build time is far
+bigger right and I want to pull that out
+copy that out and that&#39;s essentially the
+beginnings of exactly that best practice
+of don&#39;t bring all your build
+environment with you into prod right
+just bring what you need for runtime
+right and is this and one question here
+is how hard is this so when we when we
+decide to do a build our tool constructs
+a build graph for us when we decide to
+copy a runtime over how easy is it for
+us to to ask our tools to go give me the
+smallest graph that I need so that I can
+copy it over there is that an easy thing
+or is that a hard thing and that&#39;s one
+of the things that NYX provides is
+basically you get this for free right
+that&#39;s one you know one outcome that you
+get and this leads to something
+interesting uh so because we have that
+kind of book book keeping of all those
+inputs right the inputs that function of
+input and out because you do really good
+bookkeeping of that and then because you
+give all of those things really precise
+names right those names are going to be
+basically including the hash of all the
+things that it took to create them now
+we&#39;ve got naming which allows me to do
+caching right those two those are two of
+the Cs problems that we have right the
+last one&#39;s off by one errors but now
+that we&#39;ve solve them now you get a
+really powerful capability where we can
+start to pull in uh caching Behavior
+where otherwise it was either difficult
+to do or I can share with a team or I
+can share with an organization and to do
+so safely right caching and validation
+is always an issue but if that is no
+longer a problem what are the
+possibilities yeah yeah exact and I mean
+back to this abstraction at the bottom
+here if I know the inputs and the inputs
+don&#39;t change and I get the same output I
+have a strategy for what for how caching
+should be and this is like in some ways
+the the fact that NYX is constantly
+pushing me to to Define this is one of
+the things that I like the best about it
+and kind of one of the things that is
+sort of like the hardest so earlier when
+I said it was really easy to get used to
+not having the FHS standard it&#39;s
+actually really hard to get used to the
+fact that NYX is constantly pushing me
+to really be clear about what my inputs
+are because I&#39;ve gotten lazy and in fact
+fact sometimes I think I know what my
+inputs are and then I actually do the
+build and I go I did not know what my
+inputs were and it&#39;s so it&#39;s it&#39;s
+putting that front and center and in the
+end I mean I&#39;m getting some I I get
+somewhere where I&#39;ve I have isolated
+this but it&#39;s like running this little
+experiment over and over again making
+sure that my in my inputs are producing
+the this output reliably and and
+consistently and I&#39;m doing that at build
+time and I&#39;m doing that
+continuously and and why do we do this
+right because I&#39;ve often found if you
+don&#39;t do something like this you will
+inevitably pay for it it might speed
+something up day one but day 10 day 100
+you will end up paying for if there&#39;s
+something that you didn&#39;t track you
+didn&#39;t know that you depended on
+something there was some remote resource
+some service some random like you know
+corporate resource that you needed to
+access and if you didn&#39;t track it you
+didn&#39;t know that it was there it almost
+always comes back to bite you and so uh
+dealing with it upfront is an investment
+again but it&#39;s worthwhile
+okay so here&#39;s what we what we did in
+order to try to like Bridge these two
+worlds and make it really easy to start
+with NYX and have a a path towards
+building uh working in the docker
+ecosystem with it um so I&#39;m going to
+explain this this
+approach and just want to highlight that
+one of the things we tried to do with
+this is just use Docker file best
+practices so we went we went through and
+we we made sure that we are looking at
+build contexts appropriately running
+with do Docker ignores using multi-stage
+builds having like very carefully
+crafted run statements and we&#39;ve come up
+with a uh a Docker file that represents
+these these best practices and um and
+uses Nicks and this Docker file supports
+a bunch of applications and uh we we
+we&#39;ve we&#39;ve got sample applications that
+we can we can uh let everyone look at we
+tried to have a fairly diverse set of
+TCH Stacks here and we also tried to use
+a diverse set of different package e
+ecosystems to make sure that what we&#39;re
+trying to do here is actually you know
+working across a diverse set of
+applications so let me explain a little
+bit what the what the shim actually
+actually does and one of the highlights
+or one of the the things that&#39;s
+interesting about it is we&#39;ve stopped
+using base
+images so of course we bootstrap the
+process um at the at there at the
+beginning but going back to that idea of
+using of building the graph once we&#39;ve
+built the graph we just copy that over
+into our final image and the final image
+is always
+scratch so you don&#39;t see so this
+particular this particular methodology
+doesn&#39;t actually use base
+images the build itself starts by
+Computing what is the build time graph
+that you need and pulls that
+in step two it runs the
+build step three it computes a minimal
+runtime graph and step four it
+constructs an sbom from that graph so it
+it constructs that it it looks at the
+runtime that you&#39;ve built and the build
+time and Records all of the packages
+that that have gone in as a as an esbb
+so if we take a take a look at that
+break that down a little bit this is
+kind of the most
+interesting statement in the the if oh
+yeah the this is this is the kind of the
+most interesting statement in this whole
+Docker file because
+the Highlight here is that the Nyx is a
+graph
+database and so what I do right at the
+end of the build is I query that graph
+database for my runtime and that&#39;s all
+I&#39;m doing right there is I&#39;m I&#39;m asking
+I&#39;m asking NYX for the minimal runtime
+so that I have that and I can copy it to
+the next to the next stage so that qu
+that answer to the question is this easy
+it is easy it doesn&#39;t have it doesn&#39;t
+have any
+language specific technology specific or
+package ecosystem specific work in it
+it&#39;s just one line and it&#39;s always the
+same because again we you letting it
+we&#39;re letting the software do the work
+here NYX is is is has already a graph
+database so let&#39;s just query it you have
+something there that&#39;s doing the
+bookkeeping for you right that
+bookkeeping helps you do this safely so
+again it tracks it you don&#39;t have to
+track it humans are really bad at
+keeping track of what you need what you
+don&#39;t need how to allocate it how to
+deallocate it uh whether those
+references are still alive or dead
+doesn&#39;t sound like something humans tend
+to be good at in fact those are the
+things that tend to lead towards
+vulnerabilities this next line um
+generates an s bomb from that runtime
+graph um so we we want to make that as
+declarative as possible and uh finally
+we copy the contents into into our into
+our final image um that&#39;s probably
+pretty obvious I want to highlight that
+like let&#39;s make sure that we&#39;re using
+buildkit appropriately here let&#39;s make
+sure we&#39;re using Docker appropriately so
+let&#39;s always set up our cache mounting
+correctly so that our our builds this is
+going to be 95% speed up on on anytime
+you do more than one build um we also
+are in the next line we&#39;re setting up to
+use your build context
+appropriately often you don&#39;t know
+whether your build context can be read
+only with NYX your build context can
+100% of the time be be read only um so
+this is always safe to do notice there&#39;s
+never there&#39;s no copy statements build
+copying your source code into this into
+this build stage we just Mount the build
+context directly and finally it&#39;s kind
+of an an interesting thing that NYX like
+we said it&#39;s insanely cachable so that
+we we can set this up so that our
+private packages are always shared in a
+local network so if you&#39;re two people
+are doing the same build with the same
+inputs and some someone&#39;s already done
+it you can grab it this cache is this
+cach is meant to be something simple
+like an S3 bucket or SSH or something
+like
+that
+yep um and I think like the important
+thing about this this idea is it&#39;s just
+regular Docker build so we&#39;re not
+changing anything here you just run you
+just run a Docker file with Docker build
+um if you want to store your sbom
+attestations maybe you have a few extra
+buildkit Flags there to store to store
+that attestation and just a little like
+hint towards what we&#39;re what we&#39;re kind
+of looking at here um if you&#39;re if the
+docker file is always the same for every
+pro project then maybe we just don&#39;t
+pass
+it maybe we just put that right into
+Docker and with better buildkit and Nyx
+integration right you can actually make
+these things so that you don&#39;t have to
+repeat yourself so much you can inherit
+those wisdom wherever it comes um there
+was a talk earlier today about exactly
+this same thing and so we think this is
+a rich ecosystem here where we can
+figure out what is the best way to
+incorporate this and right uh end up
+with results that we
+want okay so some results um build time
+versus runtime graph the ideally here
+what you&#39;re going to see is that there
+when you when you have a large build
+time and a small run time you&#39;re going
+to see a big difference in your final
+images and so we just wanted to go
+through a couple like standard apps and
+just show you the difference between how
+many packages that&#39;s the that&#39;s the the
+blue line or the the line that tends to
+be long how many packages are in your
+build time and are necessary to do that
+and how many are in your runtime and
+this is all these are all reductions in
+packages that you just sort of get for
+free this just this just sort of like
+pops out of using this pattern yeah and
+so we can dig into a few other examples
+where hey for a node application
+something is now you know smaller we
+have smaller packages right there&#39;s less
+stuff now to audit there&#39;s less stuff to
+keep track of that tends to be a good
+thing right there&#39;s less perhaps less
+paperwork I got to do less compliance I
+have to do right less times I have to be
+aware of like false alarms and we&#39;re not
+paying like a huge cost for this right
+in fact this is a huge benefit it gets
+rid of the the sort of tedious work I
+don&#39;t want to do another example here is
+in the golang world okay again we can
+start to trim out these containers we
+can make them smaller uh rebuild time on
+this one kind of suffered a little bit
+but these are things that we&#39;re working
+on right um flx is trying to figure this
+out on how do I correct Al reuse the go
+go go mod cache in a way to make it that
+uh we get the same or better rebuild
+times take a look at the packages right
+go is famous for you know compiling down
+all your everything into one thing well
+and that&#39;s awesome like we we need this
+and let&#39;s actually get rid of all the
+other things in your containers that you
+don&#39;t need um so that comes up often and
+think about how many uh false alarms on
+those other uh 29 packages you&#39;re going
+to have to deal with when some uh you
+know some security tool says hey you
+have a problem there you&#39;re like we&#39;re
+not using it it&#39;s not in the runtime
+well the tool doesn&#39;t know that right or
+maybe it might guess that it is or might
+guess that it&#39;s not but be wh would to
+take care of that just remove it
+right uh here&#39;s a python right again how
+digging out a python application out of
+that build time environment is a often a
+very risky proposition imagine doing
+that for free right here if that
+Baseline image has you know 64 pieces of
+paperwork I got to figure out to kind of
+get my compliance all right now I only
+have too I&#39;ve probably saved myself a
+lot of
+time yeah so um you know we&#39;ve we&#39;ve
+kind of looked at this transition from
+layers to graphs um I think one
+interesting thing to to think about is
+what if every package was a
+layer yeah packages and layers right we
+saw earlier uh do Scout went into this
+of trying to tell like when did a
+package show up or when did a piece of
+software show up well let&#39;s kind of make
+this relationship a little bit closer
+layers and packages are kind of are
+trying to do the same thing and
+amazingly under the hood in Docker
+itself uh layers are independent like in
+containers right these are just content
+addressed like blobs and they&#39;re
+independent of each other except the
+only way you can often use them is by
+layering them one under the other and if
+we actually understand that each of
+these layers are independent right
+they&#39;re not going to conflict with each
+other we open up a lot of interesting
+possibilities right we now no longer
+maybe have uh no longer have that layer
+limitation we don&#39;t have to use overlay
+a Fest we can bind Mount things we can
+do things faster and in parallel we can
+get better sharing and reuse because now
+I could push these around because
+they&#39;re Conflict Free I don&#39;t have to be
+so methodically putting a b c d i could
+just get everything all at once and
+bring them all in in any order I see fit
+again because they&#39;re Conflict
+Free yeah I sort of think about it as
+you&#39;ve sort of changed the rules of the
+game a little bit because ultimately
+the we we have to think about layers in
+terms of order because one layer can
+always delete something and you have to
+apply them like that what what happens
+if that&#39;s impossible if all of your if
+all of your packages are fundamentally
+Conflict Free you&#39;ve just kind of
+changed the nature of how of the
+optimization you&#39;ve changed the rules of
+the
+game absolutely all right we&#39;re go into
+a little bit of demo to Showcase like
+what this is um so first off we&#39;re going
+to talk about this uh this shim that
+Docker file that encodes the best
+practices for us all right let&#39;s uh get
+this figured
+out all right so here we have an example
+this is one of uh uh docker&#39;s repos and
+cool we&#39;re going to uh try to uh run
+this
+thing using Bill kit it loads the
+context that it needs applies those best
+practices it runs it in this case looks
+like well it was cached already which is
+an awesome thing and now I don&#39;t have to
+worry about this so the application of
+the best practices was just done for me
+if we take a look at like what this
+looks like it&#39;s basically the each line
+of these things encodes one of the
+documented Docker file best practices so
+that&#39;s all we&#39;re just trying to Showcase
+here that this thing uh it works it
+works today and uh it&#39;s in use yeah
+awesome all right uh next thing I was
+going to Showcase
+is uh a little bit of I want to talk
+about uh some of these graphs some of
+these things that we can uh you know
+talk about and let&#39;s uh clear this out
+so let&#39;s say I got some kind of random
+project all right we&#39;re project raccoon
+I want to figure out uh what I&#39;m doing
+and we really really like uh something
+called cow except uh I don&#39;t have it
+anymore I don&#39;t have it right now like
+that kind of sucks that&#39;s that&#39;s
+annoying and maybe you have a different
+one and I have a different one and it
+requires all sorts of pearl things and I
+don&#39;t even know Pearl so how do I get
+cpan set up H that&#39;s annoying well what
+if I just kind of had this stuff as soon
+as I enter uh let&#39;s say project bunny I
+want to go into project bunny we have a
+very kind of uh critical uh thing we
+want to do we want Mobi to say bunny
+great well do I have C now all right
+cool now I have it all right but that&#39;s
+not Moby so instead we&#39;re going to do a
+whole whole bunch of programming whole
+bunch of uh design iteration and like
+product is going to have a say in all
+this but eventually we end up with being
+able to say all right cool now Mobi says
+bunny I love that and I get to move on
+with my life ah no I got to deploy this
+I need to scale this this has to be done
+100 thousand times all across the world
+so instead I now need to make sure this
+thing is containerized well all right
+I&#39;m going to do a little bit of uh
+loading this into Docker cool I&#39;m going
+to grab only the runtime portions these
+are are all these pads you saw kind of
+Roll by here I&#39;m only going to grab that
+portion not all the other portions of
+pearl or all the other libraries that I
+might have used for development or
+linting or debugging because I mean
+debugging Pearl you need all sorts of
+other things but now I have a container
+and I run that container boom now Mobi
+says Bunny and now I can push this all
+over the globe scale up infinitely and
+uh life is good and kpis go up all right
+what happened now uh let&#39;s kind of like
+dig into a little bit of what&#39;s going on
+I&#39;m going to try to kind of colorize a
+few
+things all right this is the list of
+packages that I needed right they&#39;re
+colored in green that means this is
+stuff I needed at runtime this is just
+your runtime Yep this is it now
+obviously because I&#39;m running some
+complicated programming at all sorts of
+random stuff but I need more when I do
+build well what do I need during build
+well it&#39;s going to be more things right
+I need all sorts of I don&#39;t know
+debuggers and make and tools and gzip
+and I don&#39;t know all sorts of Random
+stuff has come in because hey developers
+they like all their random tools this is
+all needed for building but I need more
+than this right when I want to do
+development I need all this stuff I need
+to build my software but also need to
+develop my software so there&#39;s a whole
+another set of things I might need right
+which here are going to be uh in purple
+like these are stuff I might need like I
+mean I need cxs I don&#39;t need that during
+build I don&#39;t need that during runtime I
+need that while I&#39;m kind to Traverse a
+code base so you can see we have like
+all the stuff that you might need and
+how we kind of also can pull stuff out
+of that graph pull the components out
+that are necessary for any one
+particular time and turn that into
+something that&#39;s either minimal or
+constrained in some way so that I don&#39;t
+have to deal with this entire build
+graph I only have to deal with the
+portion that&#39;s needed for let&#39;s say
+development or for the build or for
+runtime and that starts to trim things
+down so back to our our CI prod and and
+Dev
+do we have like one common definition
+for these or do we do we do you think
+about how would how would you describe
+that uh this is something that then it&#39;s
+one definition again it&#39;s one system one
+definition that I get to use for
+development I get to then have this uh
+pop into existence right when I go into
+that project right if I&#39;m in Project
+bunny then cool I get access to all
+these tools I go to Project raccoon then
+uhoh they&#39;re on a different version
+they&#39;re let&#39;s say using Python and not
+Pearl then someone else is going to
+using a different set of tools how do I
+make sure those things don&#39;t conflict I
+need to be able to Hopscotch between
+these projects right without fear and we
+get this right um this convergence of CI
+prod and and development run the same
+bits everywhere at least if you can
+right that that&#39;s the best chance of
+success to be able to to uh recreate the
+the same scenarios in the same
+situations
+so we talked about uh going into
+projects being able to get all the
+things that you need um hey these uh
+containers that we&#39;re making they&#39;re
+just normal containers right you can
+inspect them you can look at them uh but
+they have this property where the layers
+are non-conflicting right now we&#39;re not
+really leveraging that property to the
+full extent and that goes into a little
+bit of like well what we want to do next
+right so our call to action here is
+first off consider using the shim
+consider using some of these tools like
+Docker and Nyx can work together very
+well who should do this hey if you care
+about containers anyone interested in
+some of these superpowers you might have
+access to take a look at this and take a
+look at this now right we have examples
+that you can draw on come talk to us
+afterwards I mean what what I what what
+I find is that most of you will probably
+come to Nyx because you&#39;re trying to
+reproduce development environments or
+you&#39;re trying to like change the way you
+build up your own development
+environment but once you have done that
+I we just just want to kind of impress
+and sort of demystify the process of
+like that content you can also use to
+build your your images as well that&#39;s I
+think that&#39;s the key here like don&#39;t
+don&#39;t think that you that you&#39;ve just
+built a big difficulty for yourself in
+putting this stuff into into images and
+um and and using your CI processes there
+is there is like a very clear path to
+using Nicks for your development
+environments and for your projects and
+also then moving in using um using it
+for your CI and and production
+environments as
+well next up um we want better
+integration between build kit and NEX so
+help us figure out exactly what that
+integration needs to be how do we kind
+of Upstream these things how do we
+expose this to people um and this we
+need some of the developers some of the
+people in this room some of the people
+listening we need to come together and
+figure out like how do we do this well
+what creates a good user experience and
+uh so again like raise issues in the in
+the build kit proc project come contact
+us uh I think there are some exciting
+possibilities that uh we can start to uh
+take take advantage of awesome and we
+really have been experimenting with with
+some of these run times too and it&#39;s
+it&#39;s kind of wild to see your ability to
+spin up run times in say like a custom
+container D environment that we are that
+we&#39;re playing around with and and really
+see that suddenly we&#39;ve got a few new
+options and I mean it&#39;s not the like my
+appreciation of this is has has been
+kind of like a slow Evolution I
+definitely started with like I love what
+this does to my Dev environments but now
+I&#39;m also starting to go hi there there
+are there are some really interesting
+properties to this that are improving my
+runtime as well and I I just know so
+much more about what has gone into my
+image yeah and then some of these issues
+like some of these performance benefits
+some of the scaling benefits and storage
+benefits really come into play once you
+start getting to Big Enterprises right
+if it&#39;s a you know if it&#39;s just you
+alone and you get a 5% storage saving
+might be not a big deal even a 50% you
+might not care but once you get to like
+very large scale where those costs
+involved to those things start to
+actually add up now you really do care
+so this is what we see is the next kind
+of big step this is a bit more longer
+term is we want to set up like a working
+group of people who care about this who
+want to make this change happen and
+let&#39;s like figure out how to incorporate
+these ideas into the standards into the
+like core uh libraries that are on the
+ecosystem so that if you get them in the
+core libraries this will per at out into
+all the various other providers and
+tools that everyone else is building
+upon and once they&#39;re there you start to
+be able to get these benefits uh for
+free so uh flx is trying to kind of
+create this working group again reach
+out to us because I think this is really
+exciting there&#39;s a lot of really cool
+possibilities Let&#39;s uh figure it out um
+we see have proof of Concepts right we
+have uh PDT started working on this this
+is was done in Docker as well we have
+experiments we&#39;re seeing all over the
+place of people playing with this idea
+let&#39;s take these proof of concept and
+actually incorporate them and kind of
+take it to that next next level that&#39;s
+the uh
+hope yeah I mean that&#39;s that&#39;s why
+Docker Docker Labs is interested in this
+and um yeah I just want to I just want
+to thank you Tom for bringing your
+expertise to this and uh you know we&#39;ve
+we&#39;ve got one of the core indx
+developers here so you know any anyone
+who&#39;s got got questions about this I
+think uh probably now&#39;s a good time
+right yeah um I&#39;ll do a little bit of a
+a pitch here um and this is what FL is
+doing right we&#39;re trying to bring these
+superpowers of Nyx bring it to work
+bring it to Enterprise leverage it right
+build these Integrations right if you
+don&#39;t integrate with other things then
+you&#39;re kind of all alone we want to
+increase our integration with the rest
+of the ecosystem so that uh it becomes
+far more viable far more useful and in
+the end uh far more
+productive so to wrap it up uh try
+Docker and Nix working together help us
+improve this integration and uh join a
+working
+group thank
+you all right we got 15 seconds for time
+for
+questions uh I have a quick question so
+I saw that for for Docker you kind of
+just uh decoupled the Bild process and
+you made all of these uh packages
+isolated is there a way where you can
+actually build all these packages just
+concurrently so that the build time is
+much smaller than what it used to be the
+the overall build time yeah yeah so I
+mean like like the in some senses like
+the build kit is an orchestrator right
+so why doesn&#39;t it take advantage of
+parallelization yes yeah yeah I mean
+that I think that is one of the things
+that we that we would like to address
+with this because we have we&#39;ve got the
+pieces we need now to do a uh like every
+time we say the NY is insanely cashable
+NY is also insanely
+parallelizable and uh and so yes I I I I
+think I think that&#39;s one of that that&#39;s
+one of the things where we we see build
+kit NX Integrations as being potentially
+really powerful yeah we we calculate
+that that graph ahead of time and
+because you know what it is ahead of
+time you could start to do a lot of
+parallel uh work yeah that&#39;s helpful I
+mean it&#39;s late it&#39;s it&#39;s weird it&#39;s lazy
+like you know where the outputs are
+going to be before like you get you can
+start depending on the outputs of things
+before they exist is that weird I think
+that&#39;s
+weird yeah so my phone died so it&#39;s
+entirely possible that I I I can I can
+Intuit it from the bitly URL you had at
+the end there that this is probably
+exactly what you did or what has been
+done but given the insane cacheability
+that has me been mentioned as well as
+the fact that you have non-overlapping
+layers my immediate thought as somebody
+who works on container run times is we
+can dispense entirely with the layer
+blobs right so if you don&#39;t if you have
+a uh a image manifest which is defined
+entirely in terms of
+cash Nix content instead of layer blobs
+you don&#39;t even need those in the
+registry you can have a snap shotter or
+some runtime implementation which
+natively understands those and populates
+the rudest that defines the container
+entirely from the Nick store one of the
+example one of the experiments that&#39;s
+out there right now is called snapshot
+well and I I saw that being saw in the
+working group slide which I assume is uh
+like I said I wasn&#39;t able to get my
+phone up but yeah that Nick snapshotted
+I assume that&#39;s probably a containerd
+snapshot which natively understands
+Nick&#39;s layers yeah yeah that&#39;s right
+you&#39;ve you&#39;ve you have intuited that
+correctly yeah that no I was going to be
+uh at the end here was going to go so
+why don&#39;t you do this but I yeah that
+that&#39;s what I figured is that somebody
+had tried that so yeah yeah let&#39;s take
+this idea and then start to incorporate
+it right let&#39;s to make it so that you
+don&#39;t have to go out of your way and be
+an expert to Le and benefit from this
+let&#39;s incorporate this kind of more
+tightly into the standards into the run
+times so you start to get it for
+free
+thanks everyone okay thank you very
+[Applause]
+[Music]
+much

@@ -1,0 +1,13 @@
+[package]
+name = "youtube_transcript"
+version = "0.1.0"
+edition = "2021"
+author  =  "Adesoji_Alu"
+
+reference = "https://docs.rs/youtube-transcript/latest/youtube_transcript/"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+youtube-transcript = "0.3.2"
+tokio = { version = "1", features = ["full"] }

@@ -1,0 +1,10 @@
+/home/adesoji/youtube_transcript/target/debug/deps/libyoutube_transcript-db95690e6bb27a71.rmeta: /home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/lib.rs /home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/config.rs /home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/utils.rs /home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/error.rs /home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/parser.rs /home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/youtube.rs
+
+/home/adesoji/youtube_transcript/target/debug/deps/youtube_transcript-db95690e6bb27a71.d: /home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/lib.rs /home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/config.rs /home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/utils.rs /home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/error.rs /home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/parser.rs /home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/youtube.rs
+
+/home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/lib.rs:
+/home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/config.rs:
+/home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/utils.rs:
+/home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/error.rs:
+/home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/parser.rs:
+/home/adesoji/.cargo/registry/src/index.crates.io-6f17d22bba15001f/youtube-transcript-0.3.2/src/youtube.rs:
